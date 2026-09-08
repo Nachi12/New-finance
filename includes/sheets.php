@@ -29,15 +29,24 @@ class GoogleSheetsHelper {
         $this->client->setScopes([\Google\Service\Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
         
-        // Path to the service account credentials file
-        if (!isset($_ENV['GOOGLE_CREDENTIALS_PATH'])) {
-            throw new Exception("GOOGLE_CREDENTIALS_PATH is not set in .env file.");
+        // Try direct JSON string first (for Vercel/PaaS)
+        if (isset($_ENV['GOOGLE_CREDENTIALS_JSON']) && !empty($_ENV['GOOGLE_CREDENTIALS_JSON'])) {
+            $credentials = json_decode($_ENV['GOOGLE_CREDENTIALS_JSON'], true);
+            if (!$credentials) {
+                throw new Exception("GOOGLE_CREDENTIALS_JSON is invalid JSON.");
+            }
+            $this->client->setAuthConfig($credentials);
+        } else {
+            // Fallback to local file path
+            if (!isset($_ENV['GOOGLE_CREDENTIALS_PATH'])) {
+                throw new Exception("Either GOOGLE_CREDENTIALS_JSON or GOOGLE_CREDENTIALS_PATH must be set in environment.");
+            }
+            $credentialsPath = BASE_PATH . '/' . $_ENV['GOOGLE_CREDENTIALS_PATH'];
+            if (!file_exists($credentialsPath)) {
+                throw new Exception("Google Credentials file not found at $credentialsPath");
+            }
+            $this->client->setAuthConfig($credentialsPath);
         }
-        $credentialsPath = BASE_PATH . '/' . $_ENV['GOOGLE_CREDENTIALS_PATH'];
-        if (!file_exists($credentialsPath)) {
-            throw new Exception("Google Credentials file not found at $credentialsPath");
-        }
-        $this->client->setAuthConfig($credentialsPath);
         
         $this->service = new \Google\Service\Sheets($this->client);
     }
