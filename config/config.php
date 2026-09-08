@@ -37,6 +37,15 @@ function loadEnv($path) {
 // Load .env
 loadEnv(BASE_PATH . '/.env');
 
+// Environment variable helper (handles Vercel/PaaS differences)
+function env($key, $default = null) {
+    if (isset($_ENV[$key])) return $_ENV[$key];
+    if (isset($_SERVER[$key])) return $_SERVER[$key];
+    $val = getenv($key);
+    if ($val !== false) return $val;
+    return $default;
+}
+
 // Common formatting functions
 function formatINR($amount) {
     // Basic formatting for Indian Rupee

@@ -20,28 +20,31 @@ class GoogleSheetsHelper {
             }
         }
 
-        if (!isset($_ENV['GOOGLE_SPREADSHEET_ID'])) {
-            throw new Exception("GOOGLE_SPREADSHEET_ID is not set in .env file.");
+        $spreadsheetId = env('GOOGLE_SPREADSHEET_ID');
+        if (!$spreadsheetId) {
+            throw new Exception("GOOGLE_SPREADSHEET_ID is not set in environment.");
         }
-        $this->spreadsheetId = $_ENV['GOOGLE_SPREADSHEET_ID'];
+        $this->spreadsheetId = $spreadsheetId;
         $this->client = new \Google\Client();
         $this->client->setApplicationName('Finance Dashboard');
         $this->client->setScopes([\Google\Service\Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
         
         // Try direct JSON string first (for Vercel/PaaS)
-        if (isset($_ENV['GOOGLE_CREDENTIALS_JSON']) && !empty($_ENV['GOOGLE_CREDENTIALS_JSON'])) {
-            $credentials = json_decode($_ENV['GOOGLE_CREDENTIALS_JSON'], true);
+        $credentialsJson = env('GOOGLE_CREDENTIALS_JSON');
+        if (!empty($credentialsJson)) {
+            $credentials = json_decode($credentialsJson, true);
             if (!$credentials) {
                 throw new Exception("GOOGLE_CREDENTIALS_JSON is invalid JSON.");
             }
             $this->client->setAuthConfig($credentials);
         } else {
             // Fallback to local file path
-            if (!isset($_ENV['GOOGLE_CREDENTIALS_PATH'])) {
+            $credentialsPathEnv = env('GOOGLE_CREDENTIALS_PATH');
+            if (!$credentialsPathEnv) {
                 throw new Exception("Either GOOGLE_CREDENTIALS_JSON or GOOGLE_CREDENTIALS_PATH must be set in environment.");
             }
-            $credentialsPath = BASE_PATH . '/' . $_ENV['GOOGLE_CREDENTIALS_PATH'];
+            $credentialsPath = BASE_PATH . '/' . $credentialsPathEnv;
             if (!file_exists($credentialsPath)) {
                 throw new Exception("Google Credentials file not found at $credentialsPath");
             }
