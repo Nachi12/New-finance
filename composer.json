@@ -1,0 +1,7 @@
+{
+    "name": "inspark/finance-dashboard",
+    "description": "Personal Finance Dashboard",
+    "require": {
+        "google/apiclient": "^2.15"
+    }
+}
