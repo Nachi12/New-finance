@@ -2,11 +2,11 @@
   "builds": [
     {
       "src": "api/**/*.php",
-      "use": "vercel-community/php"
+      "use": "vercel-community/php@0.4.0"
     },
     {
       "src": "*.php",
-      "use": "vercel-community/php"
+      "use": "vercel-community/php@0.4.0"
     },
     {
       "src": "assets/**",
